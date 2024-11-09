@@ -1,0 +1,33 @@
+spring:
+    cloud:
+        config:
+            # This sets the file to look for in the config-server to 'application-prod.yml' within the branch auth
+            name: application
+            label: auth
+            profile: prod
+            discovery:
+                enabled: false
+            fail-fast: true
+            retry:
+                initial-interval: 1000
+                max-attempts: 6
+                max-interval: 2000
+                multiplier: 1.1
+            username: ${SPRING_CLOUD_CONFIG_USERNAME}
+            password: ${SPRING_CLOUD_CONFIG_PASSWORD}
+        discovery:
+            enabled: true
+eureka:
+    client:
+        service-url:
+            defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+server:
+    port: ${SERVER_PORT}
+    protocol: ${SERVER_PROTOCOL}
+
+app:
+    security:
+        default:
+            admin:
+                email: ${DEFAULT_EMAIL}
+                password: ${DEFAULT_PASSWORD}

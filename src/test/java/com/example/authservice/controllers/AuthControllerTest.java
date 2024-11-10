@@ -1,5 +1,7 @@
 package com.example.authservice.controllers;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import com.example.authservice.configs.ModelMapperConfig;
 import com.example.authservice.dto.AuthRequest;
@@ -22,139 +24,133 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
 
-    @Mock
-    private AuthService authService;
-    @Spy
-    private ModelMapper mapper = new ModelMapperConfig().modelMapper();
-    @InjectMocks
-    private AuthController authController;
+  @Mock private AuthService authService;
+  @Spy private ModelMapper mapper = new ModelMapperConfig().modelMapper();
+  @InjectMocks private AuthController authController;
+
+  @Test
+  @DisplayName("Valid user registration")
+  public void testValidRegister() {
+    // !Arrange
+    RegisterRequest registerRequest = TestDataUtil.registerTestRequest();
+
+    // !Mock
+    doNothing().when(authService).register(any(RegisterRequest.class));
+
+    // !Act
+    ResponseEntity<String> response = authController.register(registerRequest);
+
+    // !Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertNotNull(response.getBody());
+
+    // !Verify
+    verify(authService, times(1)).register(registerRequest);
+  }
+
+  @Test
+  @DisplayName("User Already existing")
+  public void testExistingUserRegistration() {
+    RegisterRequest registerRequest = TestDataUtil.registerTestRequest();
+
+    // !Mock
+    doThrow(new UserAlreadyExistsException("User already exists"))
+        .when(authService)
+        .register(any(RegisterRequest.class));
+
+    // !Act
+    assertThrows(UserAlreadyExistsException.class, () -> authController.register(registerRequest));
+
+    // !Verify
+    verify(authService, times(1)).register(registerRequest);
+  }
+
+  @Nested
+  @DisplayName("Login tests")
+  class LoginTest {
 
     @Test
-    @DisplayName("Valid user registration")
-    public void testValidRegister() {
-        //!Arrange
-        RegisterRequest registerRequest = TestDataUtil.registerTestRequest();
+    @DisplayName("Valid user login")
+    public void testValidLogin() throws Exception {
+      // !Arrange
+      AuthRequest authRequest = TestDataUtil.authTestRequest();
+      String expectedToken = "valid.jwt.token";
 
-        //!Mock
-        doNothing().when(authService).register(any(RegisterRequest.class));
+      // !Mock
+      when(authService.login(authRequest)).thenReturn(expectedToken);
 
-        //!Act
-        ResponseEntity<String> response = authController.register(registerRequest);
+      // !Act
+      ResponseEntity<AuthResponse> response = authController.login(authRequest);
 
-        //!Assert
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
+      // !Assert
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      assertNotNull(response.getBody());
+      assertEquals(expectedToken, response.getBody().getToken());
 
-        //!Verify
-        verify(authService, times(1)).register(registerRequest);
-    }
-
-    @Test
-    @DisplayName("User Already existing")
-    public void testExistingUserRegistration() {
-        RegisterRequest registerRequest = TestDataUtil.registerTestRequest();
-
-        //!Mock
-        doThrow(new UserAlreadyExistsException("User already exists"))
-                .when(authService).register(any(RegisterRequest.class));
-
-        //!Act
-        assertThrows(UserAlreadyExistsException.class, () -> authController.register(registerRequest));
-
-        //!Verify
-        verify(authService, times(1)).register(registerRequest);
-    }
-
-    @Nested
-    @DisplayName("Login tests")
-    class LoginTest {
-
-        @Test
-        @DisplayName("Valid user login")
-        public void testValidLogin() throws Exception {
-            //!Arrange
-            AuthRequest authRequest = TestDataUtil.authTestRequest();
-            String expectedToken = "valid.jwt.token";
-
-            //!Mock
-            when(authService.login(authRequest)).thenReturn(expectedToken);
-
-            //!Act
-            ResponseEntity<AuthResponse> response = authController.login(authRequest);
-
-            //!Assert
-            assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertNotNull(response.getBody());
-            assertEquals(expectedToken, response.getBody().getToken());
-
-            //!Verify
-            verify(authService, times(1)).login(authRequest);
-
-        }
-
-        @Test
-        @DisplayName("Bad credentials login")
-        public void testLoginWithBadCredentials() {
-            //!Arrange
-            AuthRequest authRequest = TestDataUtil.authTestRequest();
-
-            //!Mock
-            when(authService.login(authRequest)).thenThrow(new BadCredentialsException("Bad credentials"));
-
-            //! Act
-            ResponseEntity<AuthResponse> response = null;
-            try {
-                response = authController.login(authRequest);
-            } catch (BadCredentialsException ex) {
-                //! Assert - Check that BadCredentialsException was thrown
-                assertEquals("Bad credentials", ex.getMessage());
-            }
-
-            verify(authService, times(1)).login(authRequest);
-            assertNull(response);
-        }
+      // !Verify
+      verify(authService, times(1)).login(authRequest);
     }
 
     @Test
-    public void successfulVerification(){
-        //!Arrange
-        String token = "valid.jwt.token";
+    @DisplayName("Bad credentials login")
+    public void testLoginWithBadCredentials() {
+      // !Arrange
+      AuthRequest authRequest = TestDataUtil.authTestRequest();
 
-        //!Mock
-        doNothing().when(authService).verify();
+      // !Mock
+      when(authService.login(authRequest))
+          .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        //!Act
-        ResponseEntity<String> response = authController.verify(token);
+      // ! Act
+      ResponseEntity<AuthResponse> response = null;
+      try {
+        response = authController.login(authRequest);
+      } catch (BadCredentialsException ex) {
+        // ! Assert - Check that BadCredentialsException was thrown
+        assertEquals("Bad credentials", ex.getMessage());
+      }
 
-        //! Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Account enabled successfully", response.getBody());
-
-        //!Verify
-        verify(authService, times(1)).verify();
+      verify(authService, times(1)).login(authRequest);
+      assertNull(response);
     }
+  }
 
-    @Test
-    public void unsuccessfulVerification(){
-        //!Arrange
-        String token = "invalid.jwt.token";
+  @Test
+  public void successfulVerification() {
+    // !Arrange
+    String token = "valid.jwt.token";
 
-        //!Mock
-        doThrow(FailedEmailVerification.class).when(authService).verify();
+    // !Mock
+    doNothing().when(authService).verify();
 
-        //!Act & Assert
-        assertThrows(FailedEmailVerification.class,()->authController.verify(token));
+    // !Act
+    ResponseEntity<String> response = authController.verify(token);
 
-        //!Verify
-        verify(authService, times(1)).verify();
-        verifyNoMoreInteractions(authService);
+    // ! Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("Account enabled successfully", response.getBody());
 
-    }
+    // !Verify
+    verify(authService, times(1)).verify();
+  }
+
+  @Test
+  public void unsuccessfulVerification() {
+    // !Arrange
+    String token = "invalid.jwt.token";
+
+    // !Mock
+    doThrow(FailedEmailVerification.class).when(authService).verify();
+
+    // !Act & Assert
+    assertThrows(FailedEmailVerification.class, () -> authController.verify(token));
+
+    // !Verify
+    verify(authService, times(1)).verify();
+    verifyNoMoreInteractions(authService);
+  }
 }

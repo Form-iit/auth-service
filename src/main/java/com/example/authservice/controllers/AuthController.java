@@ -16,31 +16,32 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final AuthService service;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    @Autowired
-    public AuthController(AuthService authService) {
-        this.service = authService;
-    }
+  private final AuthService service;
+  private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request){
-        logger.info("Register controller reached");
-        service.register(request);
-        return new ResponseEntity<>("Please verify your email address :D", HttpStatus.CREATED);
-    }
+  @Autowired
+  public AuthController(AuthService authService) {
+    this.service = authService;
+  }
 
-    @GetMapping("/verify")
-    public ResponseEntity<String> verify(@RequestParam String token){
-        logger.info("Verifying email address ...");
-        service.verify();
-        return new ResponseEntity<>("Account enabled successfully", HttpStatus.OK);
-    }
+  @PostMapping("/register")
+  public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
+    logger.info("Register controller reached");
+    service.register(request);
+    return new ResponseEntity<>("Please verify your email address :D", HttpStatus.CREATED);
+  }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request){
-        logger.info("Login controller reached");
-        final String token = service.login(request);
-        return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
-    }
+  @GetMapping("/verify")
+  public ResponseEntity<String> verify(@RequestParam String token) {
+    logger.info("Verifying email address ...");
+    service.verify();
+    return new ResponseEntity<>("Account enabled successfully", HttpStatus.OK);
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+    logger.info("Login controller reached");
+    final String token = service.login(request);
+    return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
+  }
 }

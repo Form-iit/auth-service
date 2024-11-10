@@ -10,27 +10,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MailsProducer {
-    private static final Logger logger = LoggerFactory.getLogger(MailsProducer.class);
-    private final RabbitTemplate rabbitTemplate;
-    private final RabbitConfig rabbitConfig;
+  private static final Logger logger = LoggerFactory.getLogger(MailsProducer.class);
+  private final RabbitTemplate rabbitTemplate;
+  private final RabbitConfig rabbitConfig;
 
-    @Autowired
-    public MailsProducer(RabbitTemplate rabbitTemplate, RabbitConfig rabbitConfig) {
-        this.rabbitTemplate = rabbitTemplate;
-        this.rabbitConfig = rabbitConfig;
-    }
+  @Autowired
+  public MailsProducer(RabbitTemplate rabbitTemplate, RabbitConfig rabbitConfig) {
+    this.rabbitTemplate = rabbitTemplate;
+    this.rabbitConfig = rabbitConfig;
+  }
 
-    public void sendEmail(String to, String subject, String content) {
-        try {
-            EmailVerificationRequest emailVerificationRequest = EmailVerificationRequest.builder()
-                    .to(to)
-                    .subject(subject)
-                    .content(content)
-                    .build();
-            logger.info("Sending email to {} with subject {}", to, subject);
-            rabbitTemplate.convertAndSend(rabbitConfig.getExchangeName(), rabbitConfig.getRoutingKey(), emailVerificationRequest);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+  public void sendEmail(String to, String subject, String content) {
+    try {
+      EmailVerificationRequest emailVerificationRequest =
+          EmailVerificationRequest.builder().to(to).subject(subject).content(content).build();
+      logger.info("Sending email to {} with subject {}", to, subject);
+      rabbitTemplate.convertAndSend(
+          rabbitConfig.getExchangeName(), rabbitConfig.getRoutingKey(), emailVerificationRequest);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
 }

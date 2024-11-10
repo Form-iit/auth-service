@@ -16,41 +16,44 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Getter
 public class RabbitConfig {
-    public final String queueName;
-    public final String exchangeName;
-    public final String routingKey;
+  public final String queueName;
+  public final String exchangeName;
+  public final String routingKey;
 
-    @Autowired
-    public RabbitConfig(@Value("${SPRING_RABBITMQ_EXCHANGE_NAME}") String ExchangeName, @Value("${SPRING_RABBITMQ_ROUTING_KEY}")String routingKey, @Value("${SPRING_RABBITMQ_QUEUE_NAME}")String QueueName) {
-        this.exchangeName = ExchangeName;
-        this.queueName = QueueName;
-        this.routingKey = routingKey;
-    }
+  @Autowired
+  public RabbitConfig(
+      @Value("${SPRING_RABBITMQ_EXCHANGE_NAME}") String ExchangeName,
+      @Value("${SPRING_RABBITMQ_ROUTING_KEY}") String routingKey,
+      @Value("${SPRING_RABBITMQ_QUEUE_NAME}") String QueueName) {
+    this.exchangeName = ExchangeName;
+    this.queueName = QueueName;
+    this.routingKey = routingKey;
+  }
 
-    @Bean
-    public Queue EmailsQueue() {
-        return new Queue(queueName, false);
-    }
+  @Bean
+  public Queue EmailsQueue() {
+    return new Queue(queueName, false);
+  }
 
-    @Bean
-    public DirectExchange emailExchange() {
-        return new DirectExchange(exchangeName);
-    }
+  @Bean
+  public DirectExchange emailExchange() {
+    return new DirectExchange(exchangeName);
+  }
 
-    @Bean
-    public Binding binding() {
-        return BindingBuilder.bind(EmailsQueue()).to(emailExchange()).with(routingKey);
-    }
+  @Bean
+  public Binding binding() {
+    return BindingBuilder.bind(EmailsQueue()).to(emailExchange()).with(routingKey);
+  }
 
-    @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
-        return rabbitTemplate;
-    }
+  @Bean
+  public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+    rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+    return rabbitTemplate;
+  }
 
-    @Bean
-    public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+  @Bean
+  public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 }

@@ -12,18 +12,23 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Component
 public class RoleAccessDeniedHandler implements AccessDeniedHandler {
-    @Qualifier("handlerExceptionResolver")
-    private final HandlerExceptionResolver resolver;
-    private static final Logger logger = LoggerFactory.getLogger(RoleAccessDeniedHandler.class);
+  @Qualifier("handlerExceptionResolver")
+  private final HandlerExceptionResolver resolver;
 
+  private static final Logger logger = LoggerFactory.getLogger(RoleAccessDeniedHandler.class);
 
-    public RoleAccessDeniedHandler(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        super();
-        this.resolver = resolver;
-    }
-    @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) {
-        logger.info("request in the Custom Access Denied Handler");
-        resolver.resolveException(request, response, null, accessDeniedException);
-    }
+  public RoleAccessDeniedHandler(
+      @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+    super();
+    this.resolver = resolver;
+  }
+
+  @Override
+  public void handle(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AccessDeniedException accessDeniedException) {
+    logger.info("request in the Custom Access Denied Handler");
+    resolver.resolveException(request, response, null, accessDeniedException);
+  }
 }

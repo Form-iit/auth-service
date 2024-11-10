@@ -4,6 +4,9 @@ import com.example.authservice.enums.Role;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import lombok.*;
 import org.hibernate.annotations.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -12,10 +15,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -28,54 +27,51 @@ import java.util.List;
 @SoftDelete(strategy = SoftDeleteType.DELETED, columnName = "deleted")
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
-    private String firstName;
+  private String firstName;
 
-    private String lastName;
+  private String lastName;
 
-    @Email
-    @Column(unique = true)
-    private String email;
+  @Email
+  @Column(unique = true)
+  private String email;
 
-    private String password;
+  private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+  @Enumerated(EnumType.STRING)
+  private Role role;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+  @CreatedDate private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+  @LastModifiedDate private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
-    @Builder.Default
-    private LocalDateTime deletedAt = null;
+  @Column(name = "deleted_at")
+  @Builder.Default
+  private LocalDateTime deletedAt = null;
 
-    @Builder.Default
-    private boolean enabled = false;
+  @Builder.Default private boolean enabled = false;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.name()));
+  }
 
-    @Override
-    public String getUsername() {
-        return this.id;
-    }
+  @Override
+  public String getUsername() {
+    return this.id;
+  }
 
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
+  @Override
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-    @PreRemove
-    private void preRemove() {
-        this.deletedAt = LocalDateTime.now();
-        this.enabled = false;
-    }
+  @PreRemove
+  private void preRemove() {
+    this.deletedAt = LocalDateTime.now();
+    this.enabled = false;
+  }
 }

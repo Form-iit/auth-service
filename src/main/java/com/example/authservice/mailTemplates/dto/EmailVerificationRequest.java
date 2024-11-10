@@ -1,8 +1,7 @@
 package com.example.authservice.mailTemplates.dto;
 
-import lombok.*;
-
 import java.io.Serializable;
+import lombok.*;
 
 @Builder
 @Data
@@ -10,7 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class EmailVerificationRequest implements Serializable {
-    private String to;
-    private String subject;
-    private String content;
+  private String to;
+  private String subject;
+  private String content;
 }

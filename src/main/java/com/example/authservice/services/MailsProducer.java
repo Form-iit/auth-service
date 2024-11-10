@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 public class MailsProducer {
     private static final Logger logger = LoggerFactory.getLogger(MailsProducer.class);
     private final RabbitTemplate rabbitTemplate;
+    private final RabbitConfig rabbitConfig;
 
     @Autowired
-    public MailsProducer(RabbitTemplate rabbitTemplate) {
+    public MailsProducer(RabbitTemplate rabbitTemplate, RabbitConfig rabbitConfig) {
         this.rabbitTemplate = rabbitTemplate;
+        this.rabbitConfig = rabbitConfig;
     }
 
     public void sendEmail(String to, String subject, String content) {
@@ -26,7 +28,7 @@ public class MailsProducer {
                     .content(content)
                     .build();
             logger.info("Sending email to {} with subject {}", to, subject);
-            rabbitTemplate.convertAndSend(RabbitConfig.ExchangeName, RabbitConfig.ROUTING_KEY, emailVerificationRequest);
+            rabbitTemplate.convertAndSend(rabbitConfig.getExchangeName(), rabbitConfig.getRoutingKey(), emailVerificationRequest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

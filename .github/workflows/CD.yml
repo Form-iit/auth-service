@@ -10,7 +10,7 @@ on:
 jobs:
 
     deploy:
-        if: github.event.ref == 'refs/heads/main' && github.event.event == 'push'
+        if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout repository

@@ -3,7 +3,6 @@ package com.example.authservice.init;
 import com.example.authservice.enums.Role;
 import com.example.authservice.models.User;
 import com.example.authservice.repositories.AuthRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +19,6 @@ public class AdminUserInitializer implements CommandLineRunner {
   @Value("${app.security.default.admin.password}")
   private String password;
 
-  @Autowired
   public AdminUserInitializer(AuthRepo authRepo, PasswordEncoder passwordEncoder) {
     this.authRepo = authRepo;
     this.passwordEncoder = passwordEncoder;

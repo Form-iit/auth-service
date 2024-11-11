@@ -5,7 +5,6 @@ import com.example.authservice.exceptions.UserNotFoundException;
 import com.example.authservice.models.User;
 import com.example.authservice.repositories.AuthRepo;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +17,6 @@ public class UserServiceImpl implements UserService {
   private final ModelMapper mapper;
   private final PasswordEncoder passwordEncoder;
 
-  @Autowired
   public UserServiceImpl(AuthRepo authRepo, ModelMapper mapper, PasswordEncoder passwordEncoder) {
     this.authRepo = authRepo;
     this.mapper = mapper;

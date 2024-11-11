@@ -9,7 +9,6 @@ import com.example.authservice.exceptions.UserAlreadyExistsException;
 import com.example.authservice.mailTemplates.templates.mailTemplates;
 import com.example.authservice.models.User;
 import com.example.authservice.repositories.AuthRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,7 +37,6 @@ public class AuthServiceImpl implements AuthService {
   @Value("${server.protocol}")
   private String serverProtocol;
 
-  @Autowired
   public AuthServiceImpl(
       AuthRepo authRepo,
       JwtService jwtService,

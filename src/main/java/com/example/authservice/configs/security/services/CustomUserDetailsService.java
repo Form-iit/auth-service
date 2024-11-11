@@ -2,7 +2,6 @@ package com.example.authservice.configs.security.services;
 
 import com.example.authservice.exceptions.UserNotFoundException;
 import com.example.authservice.repositories.AuthRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
   private final AuthRepo repo;
 
-  @Autowired
   public CustomUserDetailsService(AuthRepo repo) {
     this.repo = repo;
   }

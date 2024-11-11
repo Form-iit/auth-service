@@ -7,7 +7,6 @@ import com.example.authservice.services.AuthService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ public class AuthController {
   private final AuthService service;
   private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-  @Autowired
   public AuthController(AuthService authService) {
     this.service = authService;
   }

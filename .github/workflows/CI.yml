@@ -1,13 +1,20 @@
-name: auth-service CI
+name: CI pipeline
 
 on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
   push:
-    branches-ignore:
+    branches:
       - main
 
 jobs:
 
-  verify:
+  format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -24,7 +31,7 @@ jobs:
         run: mvn spotless:check
 
   test:
-    needs: verify
+    needs: format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -58,48 +65,10 @@ jobs:
         run: mvn package -DskipTests
 
       - name: Upload build artifact
+        # Only upload artifact when PR is merged to main ( A PR merge is considered a push event )
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: auth-artifact
           path: target/*.jar
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: auth-artifact
-
-      - name: Create target directory
-        run: mkdir -p target
-
-      - name: Move JAR to target directory
-        run: mv *.jar target/
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up docker buildX
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to docker hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
-
-      - name: Cleanup target directory
-        run: rm -rf target/
+          retention-days: 1

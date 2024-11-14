@@ -20,9 +20,9 @@ public class RabbitConfig {
   public final String routingKey;
 
   public RabbitConfig(
-      @Value("${SPRING_RABBITMQ_EXCHANGE_NAME}") String ExchangeName,
-      @Value("${SPRING_RABBITMQ_ROUTING_KEY}") String routingKey,
-      @Value("${SPRING_RABBITMQ_QUEUE_NAME}") String QueueName) {
+      @Value("${spring.rabbitmq.exchange.name}") String ExchangeName,
+      @Value("${spring.rabbitmq.routing.key}") String routingKey,
+      @Value("${spring.rabbitmq.queue.name}") String QueueName) {
     this.exchangeName = ExchangeName;
     this.queueName = QueueName;
     this.routingKey = routingKey;

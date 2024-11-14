@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -51,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional
   public void register(RegisterRequest request) {
     // ? check for user presence
     if (authRepo.existsByEmail(request.getEmail())) {
@@ -86,6 +88,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional
   public void verify() {
     // Get the current authenticated user
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -106,6 +109,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public String login(AuthRequest request) {
     authManager.authenticate(
         new UsernamePasswordAuthenticationToken(

@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public UserDto getUserData() throws UserNotFoundException {
     String userId = getCurrentUserId();
     User user =
@@ -39,6 +41,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public UserDto EditUserData(UserDto userDto) throws UserNotFoundException {
     String userId = getCurrentUserId();
 
@@ -54,11 +57,11 @@ public class UserServiceImpl implements UserService {
     user.setEmail(userDto.getEmail() != null ? userDto.getEmail() : user.getEmail());
 
     User updatedUser = authRepo.save(user);
-    System.out.println(updatedUser);
     return mapper.map(updatedUser, UserDto.class);
   }
 
   @Override
+  @Transactional
   public String ChangeCurrentUserPassword(String oldPassword, String newPassword)
       throws UserNotFoundException, BadCredentialsException {
     String encodedOldPassword = passwordEncoder.encode(oldPassword);
@@ -77,6 +80,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public String DeleteCurrentUser() throws UserNotFoundException {
     String userId = getCurrentUserId();
 

@@ -74,7 +74,6 @@ public class JwtFilter extends OncePerRequestFilter {
         authenticateUser(jwt.get(), request);
       } else {
         handleFailedVerification(request, response);
-        return; // Early exit after handling
       }
       filterChain.doFilter(request, response);
     } catch (Exception ex) {

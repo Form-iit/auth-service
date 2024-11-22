@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,8 +26,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Component
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-  private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String BEARER_PREFIX = "Bearer ";
   private final JwtService jwtService;
@@ -62,9 +64,7 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.trace(
             "Status confirmed: request doesn't require auth... Continuing without token"
                 + " verification");
-        filterChain.doFilter(
-            request, response); // Continue the filter chain without token validation
-        return;
+        filterChain.doFilter(request, response); // Continue the filter chain without token validation
       }
       logger.trace("Request requires auth... ");
       logger.trace("extracting jwt from request");

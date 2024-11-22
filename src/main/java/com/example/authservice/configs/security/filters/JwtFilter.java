@@ -7,15 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +16,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Component
 @Slf4j
@@ -73,7 +71,8 @@ public class JwtFilter extends OncePerRequestFilter {
         logger.trace("Checking token...");
         authenticateUser(jwt.get(), request);
       } else {
-        handleFailedVerification(request, response);
+        handleFailedVerification(request, response, filterChain);
+        return; // Early exit after handling
       }
       filterChain.doFilter(request, response);
     } catch (Exception ex) {
@@ -111,7 +110,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private void authenticateUser(String token, HttpServletRequest request) {
     String userId = jwtService.extractId(token);
-    logger.trace("user ID: {}", userId);
+    logger.trace("user ID: "+ userId);
     if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       logger.trace("User non authenticated!");
       UserDetails userDetails = userDetailsService.loadUserById(userId);
@@ -132,13 +131,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
   }
 
-  private void handleFailedVerification(HttpServletRequest request, HttpServletResponse response) {
+  private void handleFailedVerification(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     if (request.getRequestURI().contains("verify")) {
       // Handle the failed verification case
-      FailedEmailVerification emailVerificationException =
-          new FailedEmailVerification("Failed to verify email");
-      logger.error("Email verification failed: {}", emailVerificationException.getMessage());
+      FailedEmailVerification emailVerificationException = new FailedEmailVerification("Failed to verify email");
+      logger.error("Email verification failed: "+ emailVerificationException.getMessage());
       resolver.resolveException(request, response, null, emailVerificationException);
     }
+    filterChain.doFilter(request, response);
   }
 }

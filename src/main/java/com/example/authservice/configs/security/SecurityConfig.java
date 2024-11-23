@@ -20,6 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -28,16 +30,19 @@ public class SecurityConfig {
   private final CustomEntryPoint authEntryPoint;
   private final JwtFilter jwtFilter;
   private final RoleAccessDeniedHandler roleAccessDeniedHandler;
+  private final List<String> openEndpoints;
 
   public SecurityConfig(
       CustomUserDetailsService customUserDetailsService,
       CustomEntryPoint authEntryPoint,
       JwtFilter jwtFilter,
-      RoleAccessDeniedHandler roleAccessDeniedHandler) {
+      RoleAccessDeniedHandler roleAccessDeniedHandler,
+      List<String> permittedEndpoints) {
     this.customUserDetailsService = customUserDetailsService;
     this.authEntryPoint = authEntryPoint;
     this.jwtFilter = jwtFilter;
     this.roleAccessDeniedHandler = roleAccessDeniedHandler;
+    this.openEndpoints = permittedEndpoints;
   }
 
   @Bean
@@ -50,7 +55,7 @@ public class SecurityConfig {
         .formLogin(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             req ->
-                req.requestMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/error")
+                req.requestMatchers(openEndpoints.toArray(new String[0]))
                     .permitAll() // Allow access to log in and register
                     .requestMatchers(new RegexRequestMatcher(".*/admin/.*", null))
                     .hasAuthority("ADMIN") // Require ADMIN authority for /admin paths

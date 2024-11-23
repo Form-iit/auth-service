@@ -9,13 +9,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -36,34 +44,42 @@ public class JwtFilter extends OncePerRequestFilter {
 
   @Qualifier("handlerExceptionResolver")
   private final HandlerExceptionResolver resolver;
+  private final List<RequestMatcher> permittedMatchers;
 
-  private final List<String> openApiEndpoints =
-      Arrays.asList("/api/v1/auth/login", "/api/v1/auth/register", "/error", "/images/.*");
 
   public JwtFilter(
       JwtService jwtService,
       CustomUserDetailsService userDetailsService,
-      @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+      @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+      List<String> permittedEndpoints) {
     super();
     this.jwtService = jwtService;
     this.userDetailsService = userDetailsService;
     this.resolver = resolver;
+    this.permittedMatchers = permittedEndpoints.stream()
+            .map(AntPathRequestMatcher::new)
+            .collect(Collectors.toList());
   }
 
   @Override
+  protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+    logger.trace("Checking whether the request doesn't require auth");
+    boolean isPermitted = permittedMatchers.stream().anyMatch(matcher -> matcher.matches(request));
+    if (isPermitted) {
+      logger.trace(
+              "Status confirmed: request doesn't require auth... Continuing without token"
+                      + " verification");
+    }
+    return isPermitted;
+  }
+
+
+  @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
+          @NonNull  HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain)
+      {
     logger.info("Request reached the JWT filter");
     try {
-      // Allow requests to log in and register without a token
-      logger.trace("Checking whether the request doesn't require auth");
-      if (isOpenEndpoint(request)) {
-        logger.trace(
-            "Status confirmed: request doesn't require auth... Continuing without token"
-                + " verification");
-        filterChain.doFilter(request, response); // Continue the filter chain without token validation
-      }
       logger.trace("Request requires auth... ");
       logger.trace("extracting jwt from request");
       Optional<String> jwt = extractJwtFromRequest(request);
@@ -78,16 +94,6 @@ public class JwtFilter extends OncePerRequestFilter {
     } catch (Exception ex) {
       resolver.resolveException(request, response, null, ex);
     }
-  }
-
-  private Boolean isOpenEndpoint(HttpServletRequest request) {
-    String requestURI = request.getRequestURI();
-    for (String endpoint : openApiEndpoints) {
-      if (Pattern.compile(endpoint).matcher(requestURI).find()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private Optional<String> extractJwtFromRequest(HttpServletRequest request) {

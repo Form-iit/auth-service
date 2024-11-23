@@ -1,4 +1,6 @@
 spring:
+    config:
+        import: "configserver:${CONFIG_SERVER_URL}"
     cloud:
         config:
             # This sets the file to look for in the config-server to 'application-prod.yml' within the branch auth

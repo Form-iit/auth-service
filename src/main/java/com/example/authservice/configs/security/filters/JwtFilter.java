@@ -7,6 +7,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
@@ -19,11 +23,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -38,8 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
   @Qualifier("handlerExceptionResolver")
   private final HandlerExceptionResolver resolver;
-  private final List<RequestMatcher> permittedMatchers;
 
+  private final List<RequestMatcher> permittedMatchers;
 
   public JwtFilter(
       JwtService jwtService,
@@ -50,9 +49,8 @@ public class JwtFilter extends OncePerRequestFilter {
     this.jwtService = jwtService;
     this.userDetailsService = userDetailsService;
     this.resolver = resolver;
-    this.permittedMatchers = permittedEndpoints.stream()
-            .map(AntPathRequestMatcher::new)
-            .collect(Collectors.toList());
+    this.permittedMatchers =
+        permittedEndpoints.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList());
   }
 
   @Override
@@ -61,17 +59,17 @@ public class JwtFilter extends OncePerRequestFilter {
     boolean isPermitted = permittedMatchers.stream().anyMatch(matcher -> matcher.matches(request));
     if (isPermitted) {
       logger.trace(
-              "Status confirmed: request doesn't require auth... Continuing without token"
-                      + " verification");
+          "Status confirmed: request doesn't require auth... Continuing without token"
+              + " verification");
     }
     return isPermitted;
   }
 
-
   @Override
   protected void doFilterInternal(
-          @NonNull  HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain)
-      {
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain) {
     logger.info("Request reached the JWT filter");
     try {
       logger.trace("Request requires auth... ");
@@ -110,7 +108,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private void authenticateUser(String token, HttpServletRequest request) {
     String userId = jwtService.extractId(token);
-    logger.trace("user ID: "+ userId);
+    logger.trace("user ID: " + userId);
     if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       logger.trace("User non authenticated!");
       UserDetails userDetails = userDetailsService.loadUserById(userId);
@@ -131,11 +129,14 @@ public class JwtFilter extends OncePerRequestFilter {
     }
   }
 
-  private void handleFailedVerification(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+  private void handleFailedVerification(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
     if (request.getRequestURI().contains("verify")) {
       // Handle the failed verification case
-      FailedEmailVerification emailVerificationException = new FailedEmailVerification("Failed to verify email");
-      logger.error("Email verification failed: "+ emailVerificationException.getMessage());
+      FailedEmailVerification emailVerificationException =
+          new FailedEmailVerification("Failed to verify email");
+      logger.error("Email verification failed: " + emailVerificationException.getMessage());
       resolver.resolveException(request, response, null, emailVerificationException);
     }
     filterChain.doFilter(request, response);

@@ -6,17 +6,18 @@ import com.example.authservice.services.UserService;
 import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/user")
+@PreAuthorize("hasRole('USER')")
+@Slf4j
 public class UserController {
   private final UserService service;
-  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
   public UserController(UserService service) {
     this.service = service;
@@ -24,7 +25,7 @@ public class UserController {
 
   @GetMapping("/me/get")
   public ResponseEntity<Map<String, Object>> GetUser() {
-    logger.info("Reached user controller");
+    log.info("Reached user controller");
     UserDto userData = service.getUserData();
     return new ResponseEntity<>(MakeResponseObject("user", userData, null), HttpStatus.OK);
   }

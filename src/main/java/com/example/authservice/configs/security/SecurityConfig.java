@@ -1,5 +1,7 @@
 package com.example.authservice.configs.security;
 
+import static com.example.authservice.enums.Role.ADMIN;
+
 import com.example.authservice.configs.security.filters.JwtFilter;
 import com.example.authservice.configs.security.services.CustomUserDetailsService;
 import java.util.List;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,6 +26,7 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
   private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
   private final CustomUserDetailsService customUserDetailsService;
@@ -56,12 +60,8 @@ public class SecurityConfig {
             req ->
                 req.requestMatchers(openEndpoints.toArray(new String[0]))
                     .permitAll() // Allow access to log in and register
-                    .requestMatchers(new RegexRequestMatcher(".*/admin/.*", null))
-                    .hasAuthority("ADMIN") // Require ADMIN authority for /admin paths
                     .requestMatchers(new RegexRequestMatcher(".*/actuator/.*", null))
-                    .hasAuthority("ADMIN")
-                    .requestMatchers(new RegexRequestMatcher(".*/user/.*", null))
-                    .hasAuthority("USER")
+                    .hasRole(ADMIN.name())
                     .anyRequest()
                     .authenticated() // Authenticate any other request
             )

@@ -51,3 +51,6 @@ build/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+#init files
+init/

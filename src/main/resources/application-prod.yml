@@ -26,10 +26,3 @@ eureka:
 server:
     port: ${SERVER_PORT}
     protocol: ${SERVER_PROTOCOL}
-
-app:
-    security:
-        default:
-            admin:
-                email: ${DEFAULT_EMAIL}
-                password: ${DEFAULT_PASSWORD}

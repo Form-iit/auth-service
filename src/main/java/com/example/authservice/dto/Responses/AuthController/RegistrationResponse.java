@@ -9,10 +9,10 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class RegistrationResponse implements BaseResponse {
-    @Builder.Default
-    private String status = "CREATED";
-    @Builder.Default
-    private String message = "Please verify your email inbox to complete the registration!";
-    @Builder.Default
-    private String type = "RegistrationResponse";
+  @Builder.Default private String status = "CREATED";
+
+  @Builder.Default
+  private String message = "Please verify your email inbox to complete the registration!";
+
+  @Builder.Default private String type = "RegistrationResponse";
 }

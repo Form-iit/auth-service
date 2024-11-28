@@ -3,32 +3,33 @@ package com.example.authservice.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.example.authservice.configs.ModelMapperConfig;
-import com.example.authservice.dto.AuthRequest;
-import com.example.authservice.dto.AuthResponse;
-import com.example.authservice.dto.RegisterRequest;
+import com.example.authservice.dto.Requests.AuthRequest;
+import com.example.authservice.dto.Requests.RegisterRequest;
+import com.example.authservice.dto.Responses.AuthController.AuthResponse;
+import com.example.authservice.dto.Responses.AuthController.RegistrationResponse;
+import com.example.authservice.dto.Responses.AuthController.VerificationResponse;
 import com.example.authservice.exceptions.FailedEmailVerification;
 import com.example.authservice.exceptions.UserAlreadyExistsException;
 import com.example.authservice.services.AuthService;
 import com.example.authservice.utils.auth.TestDataUtil;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
 
   @Mock private AuthService authService;
-  @Spy private ModelMapper mapper = new ModelMapperConfig().modelMapper();
   @InjectMocks private AuthController authController;
 
   @Test
@@ -41,10 +42,13 @@ public class AuthControllerTest {
     doNothing().when(authService).register(any(RegisterRequest.class));
 
     // !Act
-    ResponseEntity<String> response = authController.register(registerRequest);
+    ResponseEntity<RegistrationResponse> response = authController.register(registerRequest);
 
     // !Assert
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(
+        "Please verify your email inbox to complete the registration!",
+        response.getBody().getMessage());
     assertNotNull(response.getBody());
 
     // !Verify
@@ -74,7 +78,7 @@ public class AuthControllerTest {
 
     @Test
     @DisplayName("Valid user login")
-    public void testValidLogin() throws Exception {
+    public void testValidLogin() {
       // !Arrange
       AuthRequest authRequest = TestDataUtil.authTestRequest();
       String expectedToken = "valid.jwt.token";
@@ -120,34 +124,28 @@ public class AuthControllerTest {
 
   @Test
   public void successfulVerification() {
-    // !Arrange
-    String token = "valid.jwt.token";
-
     // !Mock
     doNothing().when(authService).verify();
 
     // !Act
-    ResponseEntity<String> response = authController.verify(token);
+    ResponseEntity<VerificationResponse> response = authController.verify();
 
     // ! Assert
+    log.trace(Objects.requireNonNull(response.getBody()).toString());
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Account enabled successfully", response.getBody());
-
+    assertEquals("Account enabled successfully!", response.getBody().getMessage());
     // !Verify
     verify(authService, times(1)).verify();
   }
 
   @Test
   public void unsuccessfulVerification() {
-    // !Arrange
-    String token = "invalid.jwt.token";
-
     // !Mock
     doThrow(FailedEmailVerification.class).when(authService).verify();
 
     // !Act & Assert
-    assertThrows(FailedEmailVerification.class, () -> authController.verify(token));
+    assertThrows(FailedEmailVerification.class, () -> authController.verify());
 
     // !Verify
     verify(authService, times(1)).verify();

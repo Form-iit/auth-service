@@ -1,6 +1,10 @@
 package com.example.authservice.exceptions;
 
 import io.jsonwebtoken.JwtException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +15,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @ControllerAdvice
 @Slf4j
@@ -43,18 +42,24 @@ public class GlobalExceptionHandler {
 
     HttpStatus status =
         switch (exceptionClassName) {
-          case "UserNotFoundException", "NoResourceFoundException", "FailedEmailVerification" -> HttpStatus.NOT_FOUND;
+          case "UserNotFoundException", "NoResourceFoundException", "FailedEmailVerification" ->
+              HttpStatus.NOT_FOUND;
           case "UserAlreadyExistsException" -> HttpStatus.CONFLICT;
           case "BadCredentialsException",
                   "ExpiredJwtException",
                   "SignatureException",
                   "InsufficientAuthenticationException",
                   "AccessDeniedException",
-                  "AuthorizationDeniedException"->
+                  "AuthorizationDeniedException" ->
               HttpStatus.UNAUTHORIZED;
           default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
-      GlobalErrorResponse responseBody = GlobalErrorResponse.builder().type(exceptionClassName).message(ex.getMessage()).status(status).build();
+    GlobalErrorResponse responseBody =
+        GlobalErrorResponse.builder()
+            .type(exceptionClassName)
+            .message(ex.getMessage())
+            .status(status)
+            .build();
     return new ResponseEntity<>(responseBody, status);
   }
 

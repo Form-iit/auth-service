@@ -6,6 +6,6 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
-public class UserController_UserDto extends  UserControllerBaseResponse{
-    private UserDto user;
+public class UserController_UserDto extends UserControllerBaseResponse {
+  private UserDto user;
 }

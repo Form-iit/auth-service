@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse {
-  @Schema(
-          description = "Json Web Token"
-  )
+  @Schema(description = "Json Web Token")
   private String token;
 }

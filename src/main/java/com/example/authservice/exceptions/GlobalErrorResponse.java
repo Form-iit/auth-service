@@ -9,12 +9,12 @@ import org.springframework.http.HttpStatus;
 @Builder
 @Schema(description = "The global error schema")
 public class GlobalErrorResponse {
-    @Schema(description = "The type of the exception")
-    private String type;
+  @Schema(description = "The type of the exception")
+  private String type;
 
-    @Schema(description = "A detailed error message")
-    private String message;
+  @Schema(description = "A detailed error message")
+  private String message;
 
-    @Schema(description = "HTTP status code")
-    private HttpStatus status;
+  @Schema(description = "HTTP status code")
+  private HttpStatus status;
 }

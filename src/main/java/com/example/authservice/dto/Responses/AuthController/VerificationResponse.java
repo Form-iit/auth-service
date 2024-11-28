@@ -9,10 +9,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class VerificationResponse implements BaseResponse {
-    @Builder.Default
-    private String status = "OK";
-    @Builder.Default
-    private String message = "Account enabled successfully!";
-    @Builder.Default
-    private String type = "VerificationResponse";
+  @Builder.Default private String status = "OK";
+  @Builder.Default private String message = "Account enabled successfully!";
+  @Builder.Default private String type = "VerificationResponse";
 }

@@ -15,10 +15,7 @@ import lombok.NoArgsConstructor;
 public class AuthRequest {
   @NotNull(message = "The Email address should absolutely be provided")
   @Email
-  @Schema(
-          description = "User's email",
-          example = "John.doe@example.com"
-  )
+  @Schema(description = "User's email", example = "John.doe@example.com")
   private String email;
 
   @NotNull(message = "The password should absolutely be provided")
@@ -28,9 +25,6 @@ public class AuthRequest {
       message =
           "The password should contain a least one number, one uppercase letter, one lowercase"
               + " letter and one of the symbols @ # $ % ^ & + = * ! ( ) _ /")
-  @Schema(
-          description = "User's password",
-          example = "DummyPassword_123"
-  )
+  @Schema(description = "User's password", example = "DummyPassword_123")
   private String password;
 }

@@ -1,14 +1,15 @@
 package com.example.authservice.services;
 
 import com.example.authservice.configs.security.services.JwtService;
-import com.example.authservice.dto.AuthRequest;
-import com.example.authservice.dto.RegisterRequest;
+import com.example.authservice.dto.Requests.AuthRequest;
+import com.example.authservice.dto.Requests.RegisterRequest;
 import com.example.authservice.enums.Role;
 import com.example.authservice.exceptions.FailedEmailVerification;
 import com.example.authservice.exceptions.UserAlreadyExistsException;
 import com.example.authservice.mailTemplates.templates.mailTemplates;
 import com.example.authservice.models.User;
 import com.example.authservice.repositories.AuthRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
   private final JwtService jwtService;

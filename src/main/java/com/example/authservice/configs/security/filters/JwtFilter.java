@@ -7,10 +7,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
@@ -23,6 +19,11 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -135,9 +136,8 @@ public class JwtFilter extends OncePerRequestFilter {
     if (request.getRequestURI().contains("verify")) {
       // Handle the failed verification case
       FailedEmailVerification emailVerificationException =
-          new FailedEmailVerification("Failed to verify email");
+          new FailedEmailVerification("Failed to verify email. Token could not be verified.");
       logger.error("Email verification failed: " + emailVerificationException.getMessage());
-      resolver.resolveException(request, response, null, emailVerificationException);
     }
     filterChain.doFilter(request, response);
   }

@@ -7,7 +7,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 public class UserControllerBaseResponse implements BaseResponse {
-    private String status;
-    private String message;
-    private String type;
+  private String status;
+  private String message;
+  private String type;
 }

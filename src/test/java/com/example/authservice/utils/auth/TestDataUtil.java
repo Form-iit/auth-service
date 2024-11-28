@@ -1,7 +1,7 @@
 package com.example.authservice.utils.auth;
 
-import com.example.authservice.dto.AuthRequest;
-import com.example.authservice.dto.RegisterRequest;
+import com.example.authservice.dto.Requests.AuthRequest;
+import com.example.authservice.dto.Requests.RegisterRequest;
 
 public class TestDataUtil {
 

@@ -12,19 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserDto {
-  @Schema(
-          description = "User's first name",
-          example = "John"
-  )
+  @Schema(description = "User's first name", example = "John")
   private String firstName;
-  @Schema(
-          description = "User's last name",
-          example = "Doe"
-  )
+
+  @Schema(description = "User's last name", example = "Doe")
   private String lastName;
-  @Schema(
-          description = "User's email",
-          example = "John.doe@example.com"
-  )
-  @Email private String email;
+
+  @Schema(description = "User's email", example = "John.doe@example.com")
+  @Email
+  private String email;
 }

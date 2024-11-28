@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.example.authservice.configs.security.services.JwtService;
-import com.example.authservice.dto.RegisterRequest;
+import com.example.authservice.dto.Requests.RegisterRequest;
 import com.example.authservice.enums.Role;
 import com.example.authservice.exceptions.FailedEmailVerification;
 import com.example.authservice.exceptions.UserAlreadyExistsException;
@@ -104,8 +104,6 @@ public class AuthServiceRegistrationTest {
   class EmailVerification {
     @Mock private Authentication authObj;
     @Mock private SecurityContext context;
-
-    @Mock private MailsProducer mailer;
 
     @BeforeEach
     public void init() {

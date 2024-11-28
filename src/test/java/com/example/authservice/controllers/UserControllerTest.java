@@ -4,13 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.example.authservice.configs.ModelMapperConfig;
-import com.example.authservice.dto.ChangePasswordRequest;
+import com.example.authservice.dto.Requests.ChangePasswordRequest;
+import com.example.authservice.dto.Responses.UserController.UserController_UserDto;
+import com.example.authservice.dto.Responses.UserController.UserController_UserID;
 import com.example.authservice.dto.UserDto;
 import com.example.authservice.exceptions.UserNotFoundException;
 import com.example.authservice.models.User;
 import com.example.authservice.services.UserService;
 import com.example.authservice.utils.user.TestDataUtil;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
 
@@ -51,11 +54,11 @@ public class UserControllerTest {
       // !Mock
       when(userService.getUserData()).thenReturn(userDto);
       // !Act
-      ResponseEntity<Map<String, Object>> response = userController.GetUser();
+      ResponseEntity<UserDto> response = userController.GetUser();
       // !Assert
       assertEquals(response.getStatusCode(), HttpStatus.OK);
       assertNotNull(response.getBody());
-      assertEquals(mapper.map(response.getBody().get("user"), UserDto.class), userDto);
+      assertEquals(mapper.map(response.getBody(), UserDto.class), userDto);
       // !verify
       verify(userService, times(1)).getUserData();
     }
@@ -91,12 +94,12 @@ public class UserControllerTest {
       // !Mock
       when(userService.EditUserData(userDto)).thenReturn(userDto);
       // !Act
-      ResponseEntity<Map<String, Object>> response = userController.EditUserData(userDto);
+      ResponseEntity<UserController_UserDto> response = userController.EditUserData(userDto);
 
       // !Assert
       assertEquals(response.getStatusCode(), HttpStatus.OK);
       assertNotNull(response.getBody());
-      assertEquals(((UserDto) response.getBody().get("user")).getFirstName(), "ModifiedFirstName");
+      assertEquals((response.getBody().getUser().getFirstName()), "ModifiedFirstName");
       // !verify
       verify(userService, times(1)).EditUserData(userDto);
     }
@@ -133,11 +136,11 @@ public class UserControllerTest {
       when(userService.ChangeCurrentUserPassword(req.getOldPassword(), req.getNewPassword()))
           .thenReturn(currentUser.getUsername()); // ? the getUsername returns the ID
       // !Act
-      ResponseEntity<Map<String, Object>> response = userController.EditUserPassword(req);
+      ResponseEntity<UserController_UserID> response = userController.EditUserPassword(req);
       // !Assert
       assertEquals(response.getStatusCode(), HttpStatus.OK);
       assertNotNull(response.getBody());
-      assertEquals(response.getBody().get("Id"), currentUser.getUsername());
+      assertEquals(response.getBody().getUserId(), currentUser.getUsername());
     }
 
     @Test
@@ -166,11 +169,11 @@ public class UserControllerTest {
       // !Mock
       when(userService.DeleteCurrentUser()).thenReturn(currentUser.getUsername());
       // !Act
-      ResponseEntity<Map<String, Object>> response = userController.DeleteUserAccount();
+      ResponseEntity<UserController_UserID> response = userController.DeleteUserAccount();
       // !Assert
       assertEquals(response.getStatusCode(), HttpStatus.OK);
       assertNotNull(response.getBody());
-      assertEquals(response.getBody().get("Id"), currentUser.getUsername());
+      assertEquals(response.getBody().getUserId(), currentUser.getId());
       // !Verify
       verify(userService, times(1)).DeleteCurrentUser();
     }

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.authservice.configs.security.services.JwtService;
-import com.example.authservice.dto.AuthRequest;
+import com.example.authservice.dto.Requests.AuthRequest;
 import com.example.authservice.enums.Role;
 import com.example.authservice.exceptions.UserNotFoundException;
 import com.example.authservice.models.User;

@@ -1,10 +1,7 @@
 package com.example.authservice.exceptions;
 
 import io.jsonwebtoken.JwtException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,10 +10,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
   @ExceptionHandler({
@@ -26,10 +28,10 @@ public class GlobalExceptionHandler {
     JwtException.class,
     RoleNotFoundException.class,
     AccessDeniedException.class,
-    NoResourceFoundException.class
+    NoResourceFoundException.class,
+    FailedEmailVerification.class
   })
   public ResponseEntity<Object> handleCustomExceptions(Exception ex) {
-    Map<String, Object> responseBody = new HashMap<>();
     // ? Unwrap the exception if it's an InternalAuthenticationServiceEx to expose the underlying
     // cause which is EmailNotFoundEx
     Throwable cause = ex;
@@ -38,23 +40,21 @@ public class GlobalExceptionHandler {
     }
 
     String exceptionClassName = cause.getClass().getSimpleName();
-    responseBody.put("type", exceptionClassName);
-    responseBody.put("message", ex.getMessage());
 
     HttpStatus status =
         switch (exceptionClassName) {
-          case "UserNotFoundException", "NoResourceFoundException" -> HttpStatus.NOT_FOUND;
+          case "UserNotFoundException", "NoResourceFoundException", "FailedEmailVerification" -> HttpStatus.NOT_FOUND;
           case "UserAlreadyExistsException" -> HttpStatus.CONFLICT;
           case "BadCredentialsException",
                   "ExpiredJwtException",
                   "SignatureException",
                   "InsufficientAuthenticationException",
-                  "AccessDeniedException" ->
+                  "AccessDeniedException",
+                  "AuthorizationDeniedException"->
               HttpStatus.UNAUTHORIZED;
           default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
-
-    responseBody.put("status", status.value());
+      GlobalErrorResponse responseBody = GlobalErrorResponse.builder().type(exceptionClassName).message(ex.getMessage()).status(status).build();
     return new ResponseEntity<>(responseBody, status);
   }
 
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     HttpStatus status = HttpStatus.BAD_REQUEST;
 
     Map<String, Object> responseBody = new HashMap<>();
-    responseBody.put("status", status.value());
+    responseBody.put("status", status);
     responseBody.put("type", "MethodArgumentNotValidException");
     responseBody.put("message", "Validation failed for one or more fields.");
 
@@ -95,17 +95,17 @@ public class GlobalExceptionHandler {
     responseBody.put("type", ex.getClass().getSimpleName());
     responseBody.put("message", "Required request body is missing");
     HttpStatus status = HttpStatus.BAD_REQUEST;
-    responseBody.put("status", status.value());
+    responseBody.put("status", status);
     return new ResponseEntity<>(responseBody, status);
   }
 
   @ExceptionHandler({Exception.class, RuntimeException.class})
-  public ResponseEntity<Object> handleAnyException(Exception ex, WebRequest request) {
+  public ResponseEntity<Object> handleAnyException(Exception ex) {
     Map<String, Object> responseBody = new HashMap<>();
     responseBody.put("type", ex.getClass().getSimpleName());
     responseBody.put("message", "An unexpected error occurred: " + ex.getMessage());
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-    responseBody.put("status", status.value());
+    responseBody.put("status", status);
     return new ResponseEntity<>(responseBody, status);
   }
 }

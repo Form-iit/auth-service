@@ -180,6 +180,7 @@
                             <reflowLongStrings>true</reflowLongStrings>
                             <formatJavadoc>false</formatJavadoc>
                         </googleJavaFormat>
+                        <lineEndings>UNIX</lineEndings>
                         <importOrder/>
                         <removeUnusedImports/>
                     </java>
@@ -190,6 +191,7 @@
                         </includes>
                         <!-- define the steps to apply to those files -->
                         <trimTrailingWhitespace/>
+                        <lineEndings>UNIX</lineEndings>
                         <indent>
                             <spaces>true</spaces>
                             <spacesPerTab>4</spacesPerTab>

@@ -20,7 +20,7 @@ public class MailsProducer {
       EmailVerificationRequest emailVerificationRequest =
           EmailVerificationRequest.builder().to(to).subject(subject).content(content).build();
       logger.info("Sending email to {} with subject {}", to, subject);
-      rabbitTemplate.convertAndSend("registrationMailQueue",emailVerificationRequest);
+      rabbitTemplate.convertAndSend("registrationMailQueue", emailVerificationRequest);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -8,6 +8,7 @@ import com.example.authservice.exceptions.FailedEmailVerification;
 import com.example.authservice.exceptions.UserAlreadyExistsException;
 import com.example.authservice.mailTemplates.templates.mailTemplates;
 import com.example.authservice.models.User;
+import com.example.authservice.producers.MailsProducer;
 import com.example.authservice.repositories.AuthRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

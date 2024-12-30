@@ -9,6 +9,7 @@ import com.example.authservice.enums.Role;
 import com.example.authservice.exceptions.FailedEmailVerification;
 import com.example.authservice.exceptions.UserAlreadyExistsException;
 import com.example.authservice.models.User;
+import com.example.authservice.producers.MailsProducer;
 import com.example.authservice.repositories.AuthRepo;
 import com.example.authservice.utils.auth.TestDataUtil;
 import java.util.Optional;

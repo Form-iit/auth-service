@@ -1,0 +1,27 @@
+# A Kubernetes StorageClass is a way to define different "classes" of storage that your cluster can provide. It's essentially a template that describes how persistent volumes should be created dynamically when applications request storage.
+# What is StorageClass?
+# StorageClass acts as an abstraction layer between your applications and the underlying storage infrastructure. Instead of pre-creating static persistent volumes, you define storage classes that specify things like:
+
+# + Which storage provisioner to use (AWS EBS, GCE PD, local storage, etc.)
+# + Performance characteristics (SSD vs HDD, IOPS levels)
+# + Replication policies
+# + Encryption settings
+# + Access modes
+
+# Why use StorageClass?
+# Dynamic Provisioning: When a pod requests storage via a PersistentVolumeClaim (PVC), Kubernetes automatically creates a PersistentVolume (PV) based on the StorageClass specifications. No manual intervention needed.
+# Standardization: Different teams can request "fast-ssd" or "backup-storage" without needing to know the underlying infrastructure details.
+# Flexibility: You can offer multiple storage tiers (premium, standard, backup) and let applications choose what they need.
+# Cloud Portability: Applications can use the same storage class names across different cloud providers, even though the underlying implementation differs.
+
+# Local storage StorageClass for development (make one for cloud deployment later) 
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: postgres-local
+provisioner: kubernetes.io/no-provisioner
+parameters:
+  fsType: ext4
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: false

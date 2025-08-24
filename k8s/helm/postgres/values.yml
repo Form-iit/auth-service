@@ -1,0 +1,45 @@
+# Auth config
+auth:
+    enablePostgresUser: true
+    username: diamo
+    replicationUsername: replica_user
+    existingSecret: postgresql-secrets
+    secretKeys:
+        adminPasswordKey: postgresPassword
+        userPasswordKey: password
+        replicationPasswordKey: replicationPassword
+    database: auth
+# Persistence config
+primary:
+    persistence:
+        enabled: true
+        storageClass: "postgres-local"
+        size: 7Gi
+        accessModes:
+            - ReadWriteOnce
+# performance config
+    resources:
+        limits:
+            memory: 2Gi
+            cpu: 1000m
+        requests:
+            memory: 1Gi
+            cpu: 500m
+# pgHba config
+    pgHbaConfiguration: |
+        local   all all trust
+        host    all all all md5
+        host    all all 0.0.0.0/0   md5
+
+# Backup storage
+backup:
+    enabled: false
+    # persistence:
+        # storageClass: "postgres-backup-storage"
+        # size: 50Gi
+
+# Monitoring (optional)
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false  # Set to true if you have Prometheus Operator

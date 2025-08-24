@@ -1,0 +1,86 @@
+# Helm values for Runix pgAdmin4 deployment
+
+env:
+  email: admin@example.com
+  password: admin123
+
+persistentVolume:
+  enabled: true
+  existingClaim: "pgadmin-pvc"
+  storageClass: "pgadmin-local"
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Configure servers.json with full database credentials
+existingSecret: ""
+serverDefinitions:
+  enabled: true
+  servers:
+    1:
+      Name: "PostgreSQL Server"
+      Group: "Servers"
+      Host: "k8s-formiit-postgres-postgresql"
+      Port: 5432
+      MaintenanceDB: "postgres"
+      Username: "diamo"
+      Password: "00000000"
+      SSLMode: "prefer"
+      Timeout: 10
+      UseSSHTunnel: 0
+      TunnelPort: "22"
+      TunnelAuthentication: 0
+      Shared: false
+      SharedUsername: ""
+      Comment: "Auto-configured PostgreSQL connection"
+
+# Security context
+securityContext:
+  runAsUser: 5050
+  runAsGroup: 5050
+  fsGroup: 5050
+
+# Startup and liveness probes configuration
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+  successThreshold: 1
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Init containers to fix permissions
+initContainers:
+  - name: fix-permissions
+    image: busybox:1.35
+    command: ["sh", "-c", "chown -R 5050:5050 /var/lib/pgadmin && chmod -R 755 /var/lib/pgadmin"]
+    volumeMounts:
+      - name: data
+        mountPath: /var/lib/pgadmin
+    securityContext:
+      runAsUser: 0

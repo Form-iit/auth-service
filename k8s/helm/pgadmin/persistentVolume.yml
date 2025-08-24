@@ -1,0 +1,23 @@
+# Manually creating the PV since the storageClass uses no-provisioner
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pgadmin-pv
+spec:
+  capacity:
+    storage: 1Gi  # This is what the PV can provide
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: pgadmin-local
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube # kubectl node name
+  hostPath:
+    path: /data/pgadmin
+    type: DirectoryOrCreate

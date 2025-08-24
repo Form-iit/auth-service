@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      serviceAccountName: auth-service-sa
+      volumes:
+        - name: config-volume
+          configMap:
+            name: auth-service-config
+      containers:
+        - name: auth-service
+          #image: diamobachar/auth-service:latest-k8s
+          image: auth-service:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: "classpath:/,/config/"
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s-local
+            - name: AUTH_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: jwt-secret
+            - name: DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: datasource-url
+            - name: DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: datasource-username
+            - name: DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: datasource-password
+            - name: RABBIT_MQ_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: rabbitmq-host
+            - name: RABBIT_MQ_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: rabbitmq-port
+            - name: RABBIT_MQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: rabbitmq-username
+            - name: RABBIT_MQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: rabbitmq-password
+            - name: SWAGGER_API_DOCS
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: swagger_api-docs
+            - name: SWAGGER_UI_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: swagger_ui-path
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: google_client_id
+            - name: GOOGLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: google_secret
+            - name: GOOGLE_REDIRECT_URI
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: google_redirect_url
+            - name: GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: github_client_id
+            - name: GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: github_secret
+            - name: GITHUB_REDIRECT_URI
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: github_redirect_url
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10

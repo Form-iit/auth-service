@@ -1,5 +1,6 @@
 package com.example.authservice.models;
 
+import com.example.authservice.enums.AuthProvider;
 import com.example.authservice.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -18,6 +19,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.annotation.Nullable;
 
 @Entity
 @Table(name = "users")
@@ -40,10 +43,22 @@ public class User implements UserDetails {
   @Column(unique = true)
   private String email;
 
+  @Nullable
   private String password;
 
   @Enumerated(EnumType.STRING)
   private Role role;
+
+  // OAuth2 fields ----------------------------
+
+  private String providerId;
+
+  @Enumerated(EnumType.STRING)
+  private AuthProvider authProvider;
+
+  private String profileImageUrl;
+
+  //------------------------------------------
 
   @CreatedDate private LocalDateTime createdAt;
 
@@ -53,7 +68,12 @@ public class User implements UserDetails {
   @Builder.Default
   private LocalDateTime deletedAt = null;
 
-  @Builder.Default private boolean enabled = false;
+  @Builder.Default
+  private boolean enabled = false;
+
+  // OAuth2 users are verified by the provider
+  @Builder.Default
+  private boolean emailVerified = false;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -68,6 +88,16 @@ public class User implements UserDetails {
   @Override
   public boolean isEnabled() {
     return enabled;
+  }
+
+  // Helper method to check if user is OAuth2 user
+  public boolean isOAuth2User() {
+    return authProvider != null && authProvider != AuthProvider.LOCAL;
+  }
+
+  // Helper method to check if user has local credentials
+  public boolean hasLocalCredentials() {
+    return password != null && !password.isEmpty();
   }
 
   @PreRemove

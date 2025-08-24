@@ -1,0 +1,55 @@
+# Authentication config
+auth:
+    username: "diamo"
+    password: "rabbitmq123"
+    tls:
+        enabled: false
+
+persistence:
+    enabled: true
+    storageClass: "rabbitmq-local"
+    size: 8Gi
+
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "250m"
+  limits:
+    memory: "2Gi"
+    cpu: "500m"
+
+# --- Service Configuration ---
+# How RabbitMQ is exposed within the Kubernetes cluster.
+service:
+  # Type of the service.
+  # ClusterIP: Exposes the service on a cluster-internal IP. (Default)
+  # NodePort: Exposes the service on each Node's IP at a static port.
+  # LoadBalancer: Exposes the service externally using a cloud provider's load balancer.
+  type: ClusterIP
+  port: 5672
+  # The port for the management UI
+  # managerPort: 15672
+
+replicaCount: 1
+# Disable management plugin to simplify startup
+management:
+  enabled: false
+
+# Disable metrics and other non-essential features
+metrics:
+  enabled: false
+
+# Increase startup time limits
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 180  # Give more time for startup
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 12  # More retries

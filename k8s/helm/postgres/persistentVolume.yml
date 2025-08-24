@@ -1,0 +1,23 @@
+# Manually creating the PV since the storageClass uses no-provisioner
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 10Gi  # This is what the PV can provide
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: postgres-local
+  persistentVolumeReclaimPolicy: Delete
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - minikube # kubectl node name
+  hostPath:
+    path: /mnt/postgres-data
+    type: DirectoryOrCreate
